@@ -1,0 +1,29 @@
+# Ignore generated and sensitive/transient files
+.gradle/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pdb
+*.user
+*.log
+*.tmp
+*.bak
+*.backup
+
+# Android/Java build intermediates
+app/build/
+build/
+manual-build/
+artifacts/build-output/manual-build/
+
+# Keep intended packaged outputs and mission proof structure
+!MichAutoClipSyncTray.exe
+!artifacts/build-output/MichAutoClipSync-debug.apk
+!artifacts/build-output/.gitkeep
+!artifacts/proof/.gitkeep
+!artifacts/mission-notes/.gitkeep
+
+# Keystores should not be public
+*.keystore
+*.jks

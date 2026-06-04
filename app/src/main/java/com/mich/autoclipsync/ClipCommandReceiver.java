@@ -1,0 +1,1 @@
+package com.mich.autoclipsync; import android.content.*; public class ClipCommandReceiver extends BroadcastReceiver{ public void onReceive(Context c,Intent i){ ClipBridgeService.externalSet(c,i.getStringExtra("text")); }}
