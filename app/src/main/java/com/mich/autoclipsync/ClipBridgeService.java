@@ -38,7 +38,7 @@ public class ClipBridgeService extends Service {
             ((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(ch);
         }
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, "sync") : new Notification.Builder(this);
-        b.setContentTitle("MichAutoClipSync").setContentText("ADB bridge active on phone port 8765").setSmallIcon(android.R.drawable.stat_notify_sync).setOngoing(true);
+        b.setContentTitle("MichAutoClipSync").setContentText("ADB bridge active on phone port 8765").setSmallIcon(com.mich.autoclipsync.R.drawable.ic_mich_auto_clip_sync_notify).setOngoing(true);
         startForeground(42, b.build());
     }
 

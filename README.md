@@ -4,9 +4,9 @@ MichAutoClipSync is a Windows system-tray + Android companion project for bidire
 
 It creates:
 
-- `MichAutoClipSyncTray.exe`: a native Windows tray application with a green project-related `M` tray icon.
+- `MichAutoClipSyncTray.exe`: a native Windows tray application built with the project clipboard-sync icon embedded in the EXE.
 - `Start-MichAutoClipSync.ps1`: the tray-owned sync runner that keeps ADB forwarding and clipboard polling alive.
-- `com.mich.autoclipsync`: an Android companion APK with a foreground service, local HTTP bridge, and accessibility clipboard observer.
+- `com.mich.autoclipsync`: an Android companion APK with a custom clipboard/arrows launcher icon, foreground service, local HTTP bridge, and accessibility clipboard observer.
 - `MichAutoClipSync Tray`: a Windows logon scheduled task so the tray app starts after Windows sign-in.
 
 ## Important Android limitation
