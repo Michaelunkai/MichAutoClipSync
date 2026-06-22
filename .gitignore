@@ -16,12 +16,31 @@ app/build/
 build/
 manual-build/
 artifacts/build-output/manual-build/
+artifacts/build-output/probe-build/
+artifacts/build-output/AndroidClipboardProbe-debug.apk.idsig
+
+# Local runtime/proof scratch that should not be published
+artifacts/proof/phone-base-url.txt
+artifacts/proof/sync-runner.log
+artifacts/proof/tray.log
+artifacts/proof/GooglePermissionController.apk
+artifacts/proof/SamsungMDX.apk
+artifacts/proof/mdx-dexdump.txt
+artifacts/proof/mdx_smali/
+artifacts/proof/mdx_unzip/
+artifacts/proof/android-background-state.txt
+artifacts/proof/background-observer-before-install.txt
+artifacts/proof/install-background-observer.txt
+artifacts/proof/roles-xmltree.txt
 
 # Keep intended packaged outputs and mission proof structure
 !MichAutoClipSyncTray.exe
 !artifacts/build-output/MichAutoClipSync-debug.apk
+!artifacts/build-output/AndroidClipboardProbe-debug.apk
 !artifacts/build-output/.gitkeep
 !artifacts/proof/.gitkeep
+!artifacts/proof/final-no-adb-lan-verify.txt
+!artifacts/proof/android-background-copy-proof.txt
 !artifacts/mission-notes/.gitkeep
 
 # Keystores should not be public

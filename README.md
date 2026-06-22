@@ -1,42 +1,54 @@
 # MichAutoClipSync
 
-MichAutoClipSync is a Windows system-tray + Android companion project for bidirectional clipboard synchronization experiments on Michael's Samsung S25 Ultra.
+MichAutoClipSync is a Windows tray app plus Android companion APK for LAN-first bidirectional clipboard synchronization between this Windows PC and Michael's Samsung S25 Ultra.
 
-It creates:
+The live entry point is:
 
-- `MichAutoClipSyncTray.exe`: a native Windows tray application built with the project clipboard-sync icon embedded in the EXE.
-- `Start-MichAutoClipSync.ps1`: the tray-owned sync runner that keeps ADB forwarding and clipboard polling alive.
-- `com.mich.autoclipsync`: an Android companion APK with a custom clipboard/arrows launcher icon, foreground service, local HTTP bridge, and accessibility clipboard observer.
-- `MichAutoClipSync Tray`: a Windows logon scheduled task so the tray app starts after Windows sign-in.
+```text
+F:\study\Windows\Applications\Mobile\Android\Clipboard\Sync\TrayApps\MichAutoClipSync\MichAutoClipSyncTray.exe
+```
 
-## Important Android limitation
+## Current behavior
 
-Windows to Android works through the tray runner and ADB bridge. Android companion-app copy to Windows is supported and testable. Arbitrary copy events from every third-party Android app (Telegram, Chrome, WhatsApp, etc.) are restricted by Android/Samsung security for normal sideloaded apps. This repo records the exact blocker observed during the original mission: Samsung Android 16 returned `No shell command implementation` for `cmd clipboard get`, and arbitrary other-app copy events were not exposed to the sideloaded app even with foreground service, accessibility service, and clipboard appops allowed.
+- Windows text copied to the clipboard is sent to Android over LAN.
+- Android UI text copy events are sent back to Windows through the Samsung clipboard observer with an accessibility selected-text fallback.
+- Windows image and screenshot clipboard payloads are sent to Android as pasteable image content.
+- Android screenshots and screenshot-like MediaStore images are sent to the Windows clipboard as images.
+- Runtime sync does not require Wireless Debugging, ADB forwarding, or USB; ADB is only used by install/build/verification scripts.
+- The tray starts at Windows sign-in through StartupMaster, targeting the exact EXE above.
 
-For true every-app Android to Windows clipboard sync, the privileged route is official Microsoft Phone Link / Samsung Link to Windows after its connection-delay state is fixed, or a privileged/system/IME-style integration explicitly approved by the user.
+## Components
 
-## Prerequisites
+- `MichAutoClipSyncTray.exe`: native Windows tray application and user-facing launcher.
+- `Start-MichAutoClipSync.ps1`: tray-owned sync runner. It discovers the Android bridge on LAN first and only attempts an ADB kick during startup recovery if LAN is unavailable.
+- `com.mich.autoclipsync`: Android companion APK with a foreground LAN HTTP bridge, boot receiver, image provider, accessibility service, Samsung clipboard observer, and MediaStore image observer.
+- `tools/AndroidClipboardProbe`: verification-only Android helper app used to simulate real UI text copy and screenshot-file image events.
 
-- Windows PowerShell 5.1.
-- Existing `aadb` function in the user's PowerShell profile.
-- Android platform tools at `C:\Users\micha\AppData\Local\Android\platform-tools\adb.exe`.
-- Android SDK/build tools at `C:\Users\micha\bubblewrap-tools\android_sdk`.
-- JDK at `C:\Users\micha\android-build-tools\jdk`.
-- Authorized ADB device: Samsung S25 Ultra `SM-S938B`.
+## Android limitation
+
+Android does not allow a normal sideloaded app to read every arbitrary private clipboard image URI from other apps while running in the background. This project therefore uses durable no-ADB paths that are available on this device:
+
+- Samsung clipboard event plus accessibility selected-text fallback for Android UI text copy.
+- MediaStore screenshot/screenshot-like image observer for Android screenshots and saved clipboard-like images.
+- Companion bridge `/image` endpoint for explicit image payloads.
+
+Direct background capture of every private image copied inside every Android app would require privileged/system/IME integration or an OEM-supported API.
 
 ## Build
 
-From this folder in Windows PowerShell 5.1:
+Run from this folder in Windows PowerShell 5.1:
 
 ```powershell
 .\build-tray.ps1
 .\build-android.ps1
+.\build-probe.ps1
 ```
 
 Outputs:
 
 - `MichAutoClipSyncTray.exe`
 - `artifacts\build-output\MichAutoClipSync-debug.apk`
+- `artifacts\build-output\AndroidClipboardProbe-debug.apk`
 
 ## Install and run
 
@@ -44,36 +56,52 @@ Outputs:
 .\install-MichAutoClipSync.ps1
 ```
 
-This installs the APK, starts the Android service, enables the companion accessibility service, registers the Windows logon scheduled task, and launches the repo-local tray EXE.
+The installer rebuilds the tray EXE and APK, installs the Android companion, enables the accessibility service, registers Windows startup, and launches the repo-local tray EXE.
+
+The verified Windows startup task is:
+
+```text
+\MichStartupMaster\CustomStartup_MichAutoClipSyncTray_6ab3a629
+```
 
 ## Verify
 
 ```powershell
 .\verify-MichAutoClipSync.ps1
+.\verify-AndroidBackgroundCopy.ps1
 ```
 
-The verifier checks:
+The verification suite checks:
 
-1. Tray EXE is running.
-2. Tray-owned runner is running.
-3. Android accessibility service is enabled.
-4. Windows clipboard reaches Android bridge.
-5. Android companion app copy reaches Windows clipboard.
+1. Exact tray EXE is running.
+2. Tray-owned sync runner is running.
+3. Android bridge is reachable on LAN without an ADB forward.
+4. Windows text clipboard reaches Android.
+5. Android text copy reaches Windows.
+6. Windows image/screenshot clipboard reaches Android.
+7. Android screenshot-file image reaches Windows.
+8. Android background observers are installed and reporting healthy status.
+
+Latest committed proof files:
+
+- `artifacts\proof\final-no-adb-lan-verify.txt`
+- `artifacts\proof\android-background-copy-proof.txt`
 
 ## Important files
 
-- `MichAutoClipSyncTray.cs` — native Windows tray app source.
-- `MichAutoClipSyncTray.exe` — runnable tray app entry point.
-- `Start-MichAutoClipSync.ps1` — sync loop owned by the tray app.
-- `install-MichAutoClipSync.ps1` — build/install/register/start script.
-- `verify-MichAutoClipSync.ps1` — live bidirectional proof script.
-- `app/src/main/java/com/mich/autoclipsync/` — Android companion source.
-- `artifacts/mission-notes/` — copied notes from the Telegram mission.
-- `artifacts/proof/` — verification and runtime logs.
+- `MichAutoClipSyncTray.cs`: Windows tray app source.
+- `MichAutoClipSyncTray.exe`: exact runnable tray entry point.
+- `Start-MichAutoClipSync.ps1`: LAN sync loop owned by the tray app.
+- `install-MichAutoClipSync.ps1`: build/install/register/start script.
+- `verify-MichAutoClipSync.ps1`: live LAN bidirectional verifier.
+- `verify-AndroidBackgroundCopy.ps1`: Android background observer verifier.
+- `app/src/main/java/com/mich/autoclipsync/`: Android companion source.
+- `tools/AndroidClipboardProbe/`: verification helper source.
+- `artifacts/proof/`: concise runtime proof files.
 
 ## Troubleshooting
 
-- If the tray icon is missing after reboot, run `schtasks /Query /TN "MichAutoClipSync Tray" /V /FO LIST` and then run `MichAutoClipSyncTray.exe` manually.
-- If Android is not connected, run `aadb connect` and `aadb devices -l`.
-- If Windows to Android works but Android arbitrary app copy does not, inspect Phone Link / Link to Windows. The observed blocker was a Link to Windows connection-delay screen.
-- If `cmd clipboard get` says `No shell command implementation`, use the companion app verification path or fix Phone Link; shell clipboard is unavailable on this Samsung build.
+- If the tray icon is missing after reboot, query `\MichStartupMaster\CustomStartup_MichAutoClipSyncTray_6ab3a629` and relaunch `MichAutoClipSyncTray.exe`.
+- If LAN discovery fails, confirm the phone and PC are on the same network, then rerun `.\install-MichAutoClipSync.ps1` while ADB is available only for recovery/setup.
+- If Android screenshots do not sync, confirm Android media image permissions are granted to `com.mich.autoclipsync`.
+- If Android text copy does not sync, confirm the `MichAutoClipSync` accessibility service remains enabled.

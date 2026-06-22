@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mich.clipprobe">
+  <application android:theme="@style/AppTheme" android:label="MichClipboardProbe" android:allowBackup="false" android:supportsRtl="true">
+    <activity android:name=".ProbeActivity" android:exported="true" />
+    <provider android:name=".ProbeImageProvider" android:authorities="com.mich.clipprobe.imageprovider" android:exported="true" android:grantUriPermissions="true" />
+  </application>
+</manifest>
